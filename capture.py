@@ -6,11 +6,11 @@ import cv2
 import numpy as np
 
 camera = PiCamera()
-camera.resolution = (800, 800)
-camera.rotation = 270
-camera.hflip = True
+camera.resolution = (256,256)
+camera.rotation = 0
+camera.hflip = False
 
-n_frames = 100
+n_frames = 10000
 
 time.sleep(1) # warm up
 
@@ -47,12 +47,17 @@ for f in camera.capture_continuous(rawCapture, format='bgr', use_video_port=True
 		x, y, w, h = cv2.boundingRect(np.vstack(contours))
 		cv2.rectangle(f_raw,(x,y), (x+w, y+h), (0,255,0),2)
 		cv2.putText(f_raw, 'Moving object', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
+		print('1 - (object detected)')
+	else:
+		print('0 - (no object detected)')
 	
 	cv2.imshow('Frame', f_raw)
-	imgs.append(f_raw)
+	# imgs.append(f_raw)
 	cv2.waitKey(1) # time in ms to show the image for (uless a key is pressed)
 	
+	if count == 0:
+		cv2.imwrite(f'frame_ex_9_03.png', f_raw)
+
 	rawCapture.truncate(0) # stream related
 	
 	# prepare for running average of next frame
@@ -62,10 +67,11 @@ for f in camera.capture_continuous(rawCapture, format='bgr', use_video_port=True
 	
 	loop_dur = (time.time() - start_t)
 	loop_durs.append(loop_dur)
-	print('loop_duration: ', loop_dur)
+	# print('loop_duration: ', loop_dur)
+	print()
 	if count == n_frames:
 		break
-
+	
 time_whole_loop = time.time()-start_t_loop
 fps_one = 1/np.mean(loop_durs)	
 fps_all = n_frames/time_whole_loop
